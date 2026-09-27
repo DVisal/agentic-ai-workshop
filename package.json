@@ -1,0 +1,23 @@
+{
+  "name": "shopeasy-data-analyst-agent",
+  "version": "1.0.0",
+  "description": "A production-grade, multi-agent AI data analytics system designed for direct-to-consumer (D2C) e-commerce brands.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DVisal/agentic-ai-workshop.git"
+  },
+  "keywords": [
+    "agentic-ai",
+    "multi-agent",
+    "gemini-2.5-flash",
+    "analytics-dashboard",
+    "d2c-ecommerce"
+  ],
+  "author": "DVisal",
+  "license": "MIT"
+}

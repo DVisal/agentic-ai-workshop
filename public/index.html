@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopEasy Data Analyst Agent</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <!-- Chart.js CDN for interactive visualizations with automatic fallback -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- 1. DASHBOARD HEADER -->
+    <header class="dashboard-header">
+      <div class="header-brand">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-details">
+          <h1>ShopEasy Data Analyst Agent</h1>
+          <div class="brand-subtitle">
+            <span>Autonomous Multi-Agent E-Commerce Analytics</span>
+            <span class="badge badge-ai">Gemini 2.5 Flash</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-meta">
+        <!-- Live Data Indicator -->
+        <span class="badge badge-live">
+          <span class="pulse-dot"></span>
+          Live Data
+        </span>
+
+        <!-- Dynamic Date Range -->
+        <span id="header-date-range" class="badge badge-date hidden"></span>
+
+        <!-- Source Google Sheet Link -->
+        <a id="header-source-link" href="#" target="_blank" rel="noopener noreferrer" class="link-source hidden">
+          <span>Source Sheet</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+        </a>
+
+        <!-- API Key Configuration -->
+        <button id="btn-config-key" class="btn btn-outline" title="Configure Gemini API Key">
+          🔑 API Key
+        </button>
+
+        <!-- Pipeline Refresh Button -->
+        <button id="btn-refresh-pipeline" class="btn btn-refresh" title="Rerun full multi-agent pipeline">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+          </svg>
+          Refresh Pipeline
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. AGENT STATUS PANEL -->
+    <section class="agent-status-panel">
+      <div class="panel-title">Active Multi-Agent Operational Status</div>
+      <div class="agent-strip">
+        <!-- Agent 1: IngestionAgent -->
+        <div id="agent-card-IngestionAgent" class="agent-card">
+          <div class="agent-info">
+            <span class="agent-name">IngestionAgent</span>
+            <span class="agent-desc">CSV Parsing & Profiler</span>
+          </div>
+          <span class="state-badge state-waiting">Waiting</span>
+        </div>
+
+        <!-- Agent 2: ChartRecommenderAgent -->
+        <div id="agent-card-ChartRecommenderAgent" class="agent-card">
+          <div class="agent-info">
+            <span class="agent-name">ChartRecommenderAgent</span>
+            <span class="agent-desc">Gemini 2.5 Flash Intent</span>
+          </div>
+          <span class="state-badge state-waiting">Waiting</span>
+        </div>
+
+        <!-- Agent 3: VisualizerAgent -->
+        <div id="agent-card-VisualizerAgent" class="agent-card">
+          <div class="agent-info">
+            <span class="agent-name">VisualizerAgent</span>
+            <span class="agent-desc">Sequential Chart Engine</span>
+          </div>
+          <span class="state-badge state-waiting">Waiting</span>
+        </div>
+
+        <!-- Agent 4: InsightAgent -->
+        <div id="agent-card-InsightAgent" class="agent-card">
+          <div class="agent-info">
+            <span class="agent-name">InsightAgent</span>
+            <span class="agent-desc">Gemini 2.5 Flash Streaming</span>
+          </div>
+          <span class="state-badge state-waiting">Waiting</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. AGENT OPERATIONS CONSOLE -->
+    <section class="terminal-panel">
+      <div class="terminal-header">
+        <div class="terminal-title">
+          <div class="terminal-dots">
+            <div class="dot dot-red"></div>
+            <div class="dot dot-yellow"></div>
+            <div class="dot dot-green"></div>
+          </div>
+          <span>OPERATIONS_CONSOLE // LIVE_LOG</span>
+        </div>
+        <div class="terminal-actions">
+          <button id="btn-autoscroll" class="btn-terminal">Auto-scroll: ON</button>
+          <button id="btn-copy-logs" class="btn-terminal">Copy Logs</button>
+          <button id="btn-clear-logs" class="btn-terminal">Clear</button>
+        </div>
+      </div>
+      <div id="terminal-logs" class="terminal-body">
+        <!-- Log entries populate dynamically -->
+      </div>
+    </section>
+
+    <!-- ==================== WIZARD STEPS ==================== -->
+
+    <!-- STEP 1: DATA SOURCE INPUT -->
+    <section id="step-1-container" class="wizard-step">
+      <div class="step-header">
+        <div class="step-label">Step 1 of 3</div>
+        <h2 class="step-title">Connect Live Google Sheet Dataset</h2>
+        <p class="step-description">
+          Enter any Google Sheet published CSV URL. The system dynamically infers the schema, detects column types, and validates <code>DD-MM-YYYY</code> dates.
+        </p>
+      </div>
+
+      <div class="input-group">
+        <input 
+          id="input-csv-url" 
+          type="url" 
+          class="text-input" 
+          placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv"
+        />
+        <button id="btn-fetch-csv" class="btn btn-primary">
+          Fetch & Profile Data
+        </button>
+      </div>
+
+      <div class="quick-links">
+        <span>Quick load sample datasets:</span>
+        <button 
+          class="quick-btn btn-load-sample" 
+          data-url="https://docs.google.com/spreadsheets/d/e/2PACX-1vR7nSFpTH_nKyzGimByHPmg4-7R-4iDnrVg_fjy0nTnNZ35Tn__w-UBCh--4SpdPnLWa9skAWpd_fx9/pub?gid=1701530588&single=true&output=csv"
+          data-sheet="https://docs.google.com/spreadsheets/d/1AXtO0XGY6BGpOte0X7FJAOdPRdrI7sJxkLEcL6Ci7V0/edit?gid=1701530588#gid=1701530588"
+        >
+          📊 ShopEasy April 2026 (Dataset 1)
+        </button>
+        <button 
+          class="quick-btn btn-load-sample" 
+          data-url="https://docs.google.com/spreadsheets/d/e/2PACX-1vQmzy1GyP2Y7g09SOcdmKoFUKQ8WMyAanBoLmzhTVEskhElSvYhI3WwOXXeO6vOS7Eb_e5Tz6x3eAYE/pub?gid=1385638631&single=true&output=csv"
+          data-sheet="https://docs.google.com/spreadsheets/d/1nB4MxdC0tAvlSjj6Z6VUGW7ucXLN6tCDpDMYwizmDk4/edit?gid=1385638631#gid=1385638631"
+        >
+          📈 ShopEasy March-May 2026 (Dataset 2)
+        </button>
+      </div>
+
+      <!-- Schema Preview Box (Hidden until fetched) -->
+      <div id="schema-preview-container" class="schema-preview-box hidden">
+        <h3 style="font-size: 1.1rem; margin-bottom: 1rem; color: #fff;">Dataset Schema & Sample Preview</h3>
+        <div id="preview-summary" class="preview-summary"></div>
+        <div id="preview-columns" class="columns-strip"></div>
+        <div class="table-responsive">
+          <table id="preview-table" class="preview-table"></table>
+        </div>
+        <div style="display: flex; justify-content: flex-end; margin-top: 1.25rem;">
+          <button id="btn-confirm-schema" class="btn btn-primary">
+            Confirm Data Looks Correct & Proceed ➔
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 2: BUSINESS QUESTIONS INPUT -->
+    <section id="step-2-container" class="wizard-step hidden">
+      <div class="step-header">
+        <div class="step-label">Step 2 of 3</div>
+        <h2 class="step-title">Enter Business Questions</h2>
+        <p class="step-description">
+          Ask up to 5 plain-English questions about your business metrics. Minimum 1 question required.
+        </p>
+      </div>
+
+      <div style="margin-bottom: 1rem; display: flex; justify-content: flex-end;">
+        <button id="btn-load-sample-questions" class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
+          ✨ Quick Load Recommended Questions
+        </button>
+      </div>
+
+      <div id="questions-list" class="questions-list">
+        <!-- Initial Question Field 1 -->
+        <div class="question-row">
+          <div class="question-index">1</div>
+          <input type="text" class="text-input" placeholder="e.g. How is revenue trending week over week this month — are we growing or slipping?" />
+          <div style="width: 28px;"></div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem;">
+        <button id="btn-add-question" class="btn btn-secondary">
+          + Add Another Question (Up to 5)
+        </button>
+        <button id="btn-submit-questions" class="btn btn-primary">
+          Submit Questions & Generate AI Recommendations ➔
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 3: AI CHART RECOMMENDATIONS -->
+    <section id="step-3-container" class="wizard-step hidden">
+      <div class="step-header">
+        <div class="step-label">Step 3 of 3</div>
+        <h2 class="step-title">Review & Refine AI Chart Recommendations</h2>
+        <p class="step-description">
+          Gemini 2.5 Flash has configured these visualizations. You can swap chart styles or axes from the dropdowns with real-time thumbnail previews.
+        </p>
+      </div>
+
+      <div id="recommendations-container" class="recs-grid">
+        <!-- Editable recommendation cards populate dynamically -->
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+        <button id="btn-confirm-configs" class="btn btn-primary" style="font-size: 1rem; padding: 0.75rem 1.75rem;">
+          Confirm Configurations & Launch Live Dashboard 🚀
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 4 & 5: LIVE DASHBOARD VIEW -->
+    <section id="step-4-container" class="hidden">
+      <!-- 4. KPI SUMMARY CARDS -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Total Realized Revenue</div>
+          <div id="kpi-revenue-val" class="kpi-value">—</div>
+          <div class="kpi-sub">Aggregated across all sales</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">Total Orders Placed</div>
+          <div id="kpi-orders-val" class="kpi-value">—</div>
+          <div class="kpi-sub">Unique completed records</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">Average Delivery Days</div>
+          <div id="kpi-delivery-val" class="kpi-value">—</div>
+          <div class="kpi-sub">Turnaround SLA benchmark</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">Delivery Success Rate</div>
+          <div id="kpi-rate-val" class="kpi-value">—</div>
+          <div class="kpi-sub">Delivered vs cancelled/returned</div>
+        </div>
+      </div>
+
+      <!-- 5. CHART SECTIONS (Rendered Sequentially) -->
+      <div id="charts-container" class="charts-grid">
+        <!-- Rendered one by one by VisualizerAgent -->
+      </div>
+
+      <!-- 6. AI STRATEGIC INSIGHTS SECTION (Streamed post-charts) -->
+      <div class="insights-card">
+        <div class="insights-header">
+          <div class="insights-title-group">
+            <div class="insights-icon">💡</div>
+            <div>
+              <h2 class="insights-title">Executive Strategic Insights</h2>
+              <p style="font-size: 0.8rem; color: #94a3b8;">Data-grounded actionable takeaways for business leadership</p>
+            </div>
+          </div>
+          <span class="badge badge-ai">AI-Generated Analysis (Gemini 2.5 Flash)</span>
+        </div>
+
+        <div id="insights-container">
+          <!-- Streamed token by token by InsightAgent -->
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- API Key Modal -->
+  <div id="api-key-modal" class="modal-backdrop hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Configure Gemini API Key</h3>
+        <button id="btn-close-modal" class="btn-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 1rem;">
+          This system uses <strong>Google Gemini 2.5 Flash (<code>gemini-2.5-flash</code>)</strong> exclusively. If <code>GEMINI_API_KEY</code> is set in your server environment, you can leave this empty.
+        </p>
+        <input 
+          id="input-gemini-key" 
+          type="password" 
+          class="text-input" 
+          placeholder="AIzaSy..." 
+          style="width: 100%; margin-bottom: 0.5rem;"
+        />
+        <p style="font-size: 0.75rem; color: #64748b;">
+          Your key is saved locally in your browser and used only to authenticate with Gemini 2.5 Flash.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-save-key" class="btn btn-primary">Save Key</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modular Scripts -->
+  <script src="/js/console.js"></script>
+  <script src="/js/ingestion.js"></script>
+  <script src="/js/recommender.js"></script>
+  <script src="/js/visualizer.js"></script>
+  <script src="/js/insights.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
